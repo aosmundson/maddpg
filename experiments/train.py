@@ -3,10 +3,16 @@ import numpy as np
 import tensorflow as tf
 import time
 import pickle
+import coloredlogs
+import logging
+
+import gym
 
 import maddpg.common.tf_util as U
 from maddpg.trainer.maddpg import MADDPGAgentTrainer
 import tensorflow.contrib.layers as layers
+
+coloredlogs.install()
 
 def parse_args():
     parser = argparse.ArgumentParser("Reinforcement Learning experiments for multiagent environments")
@@ -79,6 +85,8 @@ def train(arglist):
     with U.single_threaded_session():
         # Create environment
         env = make_env(arglist.scenario, arglist, arglist.benchmark)
+        if not isinstance(env.action_space[0], gym.spaces.discrete.Discrete):
+            logging.warning("Action space is not Discrete object. Check the discrete_action_space flag in multiagent/environment.py")
         # Create agent trainers
         obs_shape_n = [env.observation_space[i].shape for i in range(env.n)]
         num_adversaries = min(env.n, arglist.num_adversaries)
